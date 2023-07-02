@@ -13,10 +13,29 @@ import {
 
 import BGIMG from "../assets/images/BG.jpg";
 
+const initialState = {
+  login: "",
+  email: "",
+  password: "",
+};
+
 export default function RegistrationScreen() {
   const [isFocusLogin, setIsFocusLogin] = useState(false);
   const [isFocusEmail, setIsFocusEmail] = useState(false);
   const [isFocusPass, setIsFocusPass] = useState(false);
+  const [inputValues, setInputValue] = useState(initialState);
+  const [isShowPassword, setIsShowPassword] = useState(false);
+
+  const onSubmitForm = () => {
+    if (
+      inputValues.email === "" ||
+      inputValues.password === "" ||
+      inputValues.login === ""
+    )
+      return alert("Заповніть всі поля");
+    console.log(inputValues);
+    setInputValue({ ...initialState });
+  };
 
   return (
     <ImageBackground source={BGIMG} style={styles.background}>
@@ -46,6 +65,10 @@ export default function RegistrationScreen() {
                 placeholderTextColor={"#BDBDBD"}
                 onFocus={() => setIsFocusLogin(true)}
                 onBlur={() => setIsFocusLogin(false)}
+                value={inputValues.login}
+                onChangeText={(value) =>
+                  setInputValue((prevState) => ({ ...prevState, login: value }))
+                }
               />
               <TextInput
                 style={[
@@ -59,6 +82,10 @@ export default function RegistrationScreen() {
                 placeholderTextColor={"#BDBDBD"}
                 onFocus={() => setIsFocusEmail(true)}
                 onBlur={() => setIsFocusEmail(false)}
+                value={inputValues.email}
+                onChangeText={(value) =>
+                  setInputValue((prevState) => ({ ...prevState, email: value }))
+                }
               />
               <TextInput
                 style={[
@@ -70,15 +97,32 @@ export default function RegistrationScreen() {
                 ]}
                 placeholder="Пароль"
                 placeholderTextColor={"#BDBDBD"}
-                secureTextEntry={true}
+                secureTextEntry={!isShowPassword}
                 onFocus={() => setIsFocusPass(true)}
                 onBlur={() => setIsFocusPass(false)}
+                value={inputValues.password}
+                onChangeText={(value) =>
+                  setInputValue((prevState) => ({
+                    ...prevState,
+                    password: value,
+                  }))
+                }
               />
-              <TouchableOpacity activeOpacity={0.7} style={styles.btn}>
-                <Text style={styles.showPassBtn}>Показати</Text>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={styles.btn}
+                onPress={() => setIsShowPassword((prevState) => !prevState)}
+              >
+                <Text style={styles.showPassBtn}>
+                  {isShowPassword ? "Приховати" : "Показати"}
+                </Text>
               </TouchableOpacity>
             </View>
-            <TouchableOpacity activeOpacity={0.7} style={styles.submit}>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={styles.submit}
+              onPress={onSubmitForm}
+            >
               <Text style={styles.textSubmit}>Зареєстуватися</Text>
             </TouchableOpacity>
             <TouchableOpacity activeOpacity={0.7} style={styles.btn}>
