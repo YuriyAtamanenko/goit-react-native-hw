@@ -11,30 +11,32 @@ import {
   View,
 } from "react-native";
 
-import BGIMG from "../assets/images/BG.jpg";
+import BGIMG from "../../assets/images/BG.jpg";
 
 const initialState = {
-  login: "",
   email: "",
   password: "",
 };
 
-export default function RegistrationScreen() {
-  const [isFocusLogin, setIsFocusLogin] = useState(false);
+export default function LoginScreen({ navigation }) {
   const [isFocusEmail, setIsFocusEmail] = useState(false);
   const [isFocusPass, setIsFocusPass] = useState(false);
   const [inputValues, setInputValue] = useState(initialState);
   const [isShowPassword, setIsShowPassword] = useState(false);
 
   const onSubmitForm = () => {
-    if (
-      inputValues.email === "" ||
-      inputValues.password === "" ||
-      inputValues.login === ""
-    )
+    if (inputValues.email === "" || inputValues.password === "")
       return alert("Заповніть всі поля");
-    console.log(inputValues);
+
+    if (
+      !inputValues.email.includes("@") ||
+      !inputValues.email.includes(".") ||
+      inputValues.email.length < 6
+    )
+      return alert("Не коректно введена пошта");
+
     setInputValue({ ...initialState });
+    navigation.navigate("Home");
   };
 
   return (
@@ -43,33 +45,11 @@ export default function RegistrationScreen() {
         <KeyboardAvoidingView
           style={styles.container}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={-180}
+          keyboardVerticalOffset={-230}
         >
           <View style={styles.form}>
-            <View style={styles.photo}>
-              <TouchableOpacity activeOpacity={0.7} style={styles.addPhotoBtn}>
-                <Text style={styles.addPhotoText}>+</Text>
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.title}>Реєстрація</Text>
+            <Text style={styles.title}>Увійти</Text>
             <View style={styles.formInputs}>
-              <TextInput
-                style={[
-                  styles.input,
-                  {
-                    borderColor: isFocusLogin ? "#FF6C00" : "#E8E8E8",
-                    backgroundColor: isFocusLogin ? "#FFFFFF" : "#F6F6F6",
-                  },
-                ]}
-                placeholder="Логін"
-                placeholderTextColor={"#BDBDBD"}
-                onFocus={() => setIsFocusLogin(true)}
-                onBlur={() => setIsFocusLogin(false)}
-                value={inputValues.login}
-                onChangeText={(value) =>
-                  setInputValue((prevState) => ({ ...prevState, login: value }))
-                }
-              />
               <TextInput
                 style={[
                   styles.input,
@@ -123,10 +103,19 @@ export default function RegistrationScreen() {
               style={styles.submit}
               onPress={onSubmitForm}
             >
-              <Text style={styles.textSubmit}>Зареєстуватися</Text>
+              <Text style={styles.textSubmit}>Увійти</Text>
             </TouchableOpacity>
-            <TouchableOpacity activeOpacity={0.7} style={styles.btn}>
-              <Text style={styles.textBtn}>Вже є акаунт? Увійти</Text>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={styles.btn}
+              onPress={() => navigation.navigate("Registration")}
+            >
+              <Text style={styles.textBtn}>
+                Немає акаунту?{" "}
+                <Text style={{ textDecorationLine: "underline" }}>
+                  Зареєструватися
+                </Text>
+              </Text>
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
@@ -145,42 +134,15 @@ const styles = StyleSheet.create({
   },
   form: {
     flex: 1,
-    maxHeight: 550,
+    maxHeight: 490,
     marginTop: "auto",
     backgroundColor: "#fff",
     alignItems: "center",
     paddingHorizontal: 16,
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
+    paddingTop: 32,
     paddingBottom: 80,
-  },
-  photo: {
-    flex: 1,
-    justifyContent: "flex-end",
-    alignItems: "flex-end",
-    width: 120,
-    maxHeight: 120,
-    marginTop: -60,
-    marginBottom: 32,
-    borderRadius: 16,
-    backgroundColor: "#F6F6F6",
-  },
-  addPhotoBtn: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    width: 25,
-    maxHeight: 25,
-    borderWidth: 1,
-    borderColor: "#FF6C00",
-    borderRadius: 12.5,
-    backgroundColor: "#FFF",
-    marginBottom: 14,
-    marginRight: -12,
-  },
-  addPhotoText: {
-    color: "#FF6C00",
-    fontSize: 16,
   },
   title: {
     marginBottom: 32,
@@ -232,6 +194,5 @@ const styles = StyleSheet.create({
     color: "#1B4371",
     fontFamily: "R-Regular",
     fontSize: 16,
-    textDecorationLine: "underline",
   },
 });
