@@ -1,13 +1,13 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { StyleSheet, TouchableOpacity } from "react-native";
 // import screens
-import PostsScreen from "./PostsScreen";
-import CreatePostsScreen from "./CreatePostsScreen";
-import ProfileScreen from "./ProfileScreen";
+import PostsScreen from "./mainScreens/PostsScreen";
+import CreatePostsScreen from "./mainScreens/CreatePostsScreen";
+import ProfileScreen from "./mainScreens/ProfileScreen";
 
 // import icons
 import { SimpleLineIcons } from "@expo/vector-icons";
-import { AntDesign } from "@expo/vector-icons";
+import { Entypo } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 
@@ -29,8 +29,10 @@ export default function Home({ navigation }) {
       <MainTab.Screen
         options={{
           tabBarIcon: ({ focused, color, size }) => (
-            <SimpleLineIcons name="grid" size={24} color="#212121" />
+            <SimpleLineIcons name="grid" size={24} color={color} />
           ),
+          tabBarActiveTintColor: "#FF6C00",
+          tabBarInactiveTintColor: "#212121",
           headerTintColor: "#212121",
           headerTitleStyle: {
             fontFamily: "R-Medium",
@@ -57,15 +59,16 @@ export default function Home({ navigation }) {
       <MainTab.Screen
         options={{
           tabBarIcon: ({ focused, color, size }) => (
-            <AntDesign name="plus" size={18} color="#FFF" />
+            <Entypo name="plus" size={20} color={color} />
           ),
+          tabBarActiveTintColor: "#FFFFFF",
+          tabBarInactiveTintColor: "#212121",
           headerTintColor: "#212121",
           headerTitleStyle: {
             fontFamily: "R-Medium",
             fontSize: 17,
           },
           tabBarIconStyle: {
-            border: 1,
             backgroundColor: "#FF6C00",
             borderRadius: 20,
             maxHeight: 40,
@@ -78,11 +81,13 @@ export default function Home({ navigation }) {
       <MainTab.Screen
         options={{
           tabBarIcon: ({ focused, color, size }) => (
-            <Feather name="user" size={24} color="#212121" />
+            <Feather name="user" size={24} color={color} />
           ),
+          tabBarActiveTintColor: "#FF6C00",
+          tabBarInactiveTintColor: "#212121",
           headerShown: false,
         }}
-        name="Profile"
+        name="Профіль"
         component={ProfileScreen}
       />
     </MainTab.Navigator>

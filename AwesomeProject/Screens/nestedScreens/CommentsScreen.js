@@ -1,9 +1,9 @@
 import { View, Text } from "react-native";
 
-export default function PostsScreen() {
+export default function CommentsScreen() {
   return (
     <View>
-      <Text>PostScreen</Text>
+      <Text>CommentsScreen</Text>
     </View>
   );
 }
