@@ -1,9 +1,12 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { StyleSheet, TouchableOpacity } from "react-native";
+import { useDispatch } from "react-redux";
 // import screens
 import PostsScreen from "./mainScreens/PostsScreen";
 import CreatePostsScreen from "./mainScreens/CreatePostsScreen";
 import ProfileScreen from "./mainScreens/ProfileScreen";
+
+import { LogOutDB } from "./../redux/auth/authOperation";
 
 // import icons
 import { SimpleLineIcons } from "@expo/vector-icons";
@@ -13,7 +16,13 @@ import { MaterialIcons } from "@expo/vector-icons";
 
 const MainTab = createBottomTabNavigator();
 
-export default function Home({ navigation }) {
+export default function Home() {
+  const dispatch = useDispatch();
+
+  const handleLogOut = () => {
+    dispatch(LogOutDB());
+  };
+
   return (
     <MainTab.Navigator
       screenOptions={{
@@ -40,7 +49,7 @@ export default function Home({ navigation }) {
           },
           headerRight: () => (
             <TouchableOpacity
-              onPress={() => navigation.navigate("Login")}
+              onPress={handleLogOut}
               title="Log out"
               color="#fff"
             >

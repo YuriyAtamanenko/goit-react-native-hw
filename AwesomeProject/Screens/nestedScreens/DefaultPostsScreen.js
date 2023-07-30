@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import {
   View,
   Text,
@@ -9,20 +10,43 @@ import {
   TouchableOpacity,
 } from "react-native";
 
+import { db } from "./../../firebase/config";
+import { collection, query, onSnapshot, getDocs } from "firebase/firestore";
 import { Feather } from "@expo/vector-icons";
 import { SimpleLineIcons } from "@expo/vector-icons";
 
-export default function DefaultPostsScreen({ route, navigation }) {
+export default function DefaultPostsScreen({ navigation }) {
   const [posts, setPosts] = useState([]);
 
+  const userName = useSelector((state) => state.userName);
+  const email = useSelector((state) => state.email);
+  const avatar = useSelector((state) => state.avatar);
+
+  getAllPosts = async () => {
+    const q = query(collection(db, "Posts"));
+
+    onSnapshot(q, (querySnapshot) => {
+      setPosts([]);
+      querySnapshot.forEach((doc) => {
+        setPosts((prevState) => [...prevState, { ...doc.data(), id: doc.id }]);
+      });
+    });
+  };
+
   useEffect(() => {
-    if (route.params) {
-      setPosts((prevState) => [route.params, ...prevState]);
-    }
-  }, [route.params]);
+    getAllPosts();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.profile}>
+        <Image source={{ uri: avatar }} style={styles.profilePhoto} />
+        <View style={styles.profileDesription}>
+          <Text style={styles.profileName}>{userName}</Text>
+          <Text style={styles.profileEmail}>{email}</Text>
+        </View>
+      </View>
+
       <FlatList
         data={posts}
         renderItem={({ item }) => (
@@ -40,7 +64,7 @@ export default function DefaultPostsScreen({ route, navigation }) {
             >
               <TouchableOpacity
                 style={styles.commentsBtn}
-                onPress={() => navigation.navigate("Коментарі")}
+                onPress={() => navigation.navigate("Коментарі", { item })}
               >
                 <Feather name="message-circle" size={18} color="#BDBDBD" />
                 <Text style={styles.comments}> 0</Text>
@@ -73,9 +97,34 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
     paddingHorizontal: 16,
   },
-  photoView: {
-    marginTop: 32,
+  profile: {
+    marginVertical: 32,
+    display: "flex",
+    flexDirection: "row",
+    gap: 8,
+    alignItems: "center",
   },
+  profilePhoto: {
+    width: 60,
+    height: 60,
+    backgroundColor: "#cacaca",
+    borderRadius: 16,
+  },
+  profileName: {
+    fontFamily: "R-Bold",
+    fontSize: 13,
+    color: "#212121",
+  },
+
+  profileEmail: {
+    fontFamily: "R-Regular",
+    fontSize: 11,
+    color: "rgba(33, 33, 33, 0.8)",
+  },
+  photoView: {
+    marginBottom: 32,
+  },
+
   photo: {
     height: 240,
     width: "100%",

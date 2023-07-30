@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import {
   Text,
   View,
@@ -9,10 +10,13 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Platform,
-  SafeAreaView,
+  ScrollView,
 } from "react-native";
 import { Camera } from "expo-camera";
 import * as Location from "expo-location";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage, db } from "./../../firebase/config";
+import { collection, addDoc } from "firebase/firestore";
 // import icons
 import { FontAwesome } from "@expo/vector-icons";
 import { SimpleLineIcons } from "@expo/vector-icons";
@@ -26,8 +30,10 @@ export default function CreatePostsScreen({ navigation }) {
   const [camera, setCamera] = useState(null);
   const [photo, setPhoto] = useState(null);
   const [inputValues, setInputValue] = useState(initialState);
-
   const [location, setLocation] = useState(null);
+
+  const userName = useSelector((state) => state.userName);
+  const userId = useSelector((state) => state.userId);
 
   useEffect(() => {
     (async () => {
@@ -53,81 +59,116 @@ export default function CreatePostsScreen({ navigation }) {
   const sendPhoto = () => {
     setInputValue(initialState);
     setPhoto(null);
+    uploadPostToServer();
+    navigation.navigate("Список публікацій");
+  };
 
-    navigation.navigate("Список публікацій", { photo, inputValues, location });
+  const uploadPostToServer = async () => {
+    const photo = await uploadPhotoToStorage();
+
+    await addDoc(collection(db, "Posts"), {
+      userName,
+      userId,
+      photo,
+      location,
+      inputValues,
+    });
+  };
+
+  const uploadPhotoToStorage = async () => {
+    const response = await fetch(photo);
+    const file = await response.blob();
+
+    const postId = Date.now().toString();
+
+    const storageRef = ref(storage, `postsImage/${postId}`);
+    await uploadBytes(storageRef, file);
+
+    const precessedPhoto = await getDownloadURL(
+      ref(storage, `postsImage/${postId}`)
+    );
+
+    return precessedPhoto;
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
-    >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View>
-          <Camera style={styles.camera} ref={setCamera}>
-            <View style={styles.photoView}>
-              <TouchableOpacity onPress={takePhoto} style={styles.takePhotoBtn}>
-                <FontAwesome name="camera" size={24} color="white" />
-              </TouchableOpacity>
+    <ScrollView style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={-180}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View>
+            <Camera style={styles.camera} ref={setCamera}>
+              <View style={styles.photoView}>
+                <TouchableOpacity
+                  onPress={takePhoto}
+                  style={styles.takePhotoBtn}
+                >
+                  <FontAwesome name="camera" size={24} color="white" />
+                </TouchableOpacity>
+              </View>
+            </Camera>
+            <TouchableOpacity onPress={() => setPhoto(null)}>
+              <Text style={styles.text}>
+                {photo ? "Редагувати фото" : "Завантажте фото"}
+              </Text>
+            </TouchableOpacity>
+
+            <View style={styles.formInputs}>
+              <TextInput
+                style={[styles.input]}
+                placeholder="Назва..."
+                placeholderTextColor={"#BDBDBD"}
+                value={inputValues.description}
+                onChangeText={(value) =>
+                  setInputValue((prevState) => ({
+                    ...prevState,
+                    description: value,
+                  }))
+                }
+              />
+              <TextInput
+                style={[styles.input, { paddingLeft: 28 }]}
+                placeholder="Місцевість..."
+                placeholderTextColor={"#BDBDBD"}
+                value={inputValues.location}
+                onChangeText={(value) =>
+                  setInputValue((prevState) => ({
+                    ...prevState,
+                    location: value,
+                  }))
+                }
+              />
+              <SimpleLineIcons
+                style={styles.locationIcon}
+                name="location-pin"
+                size={24}
+                color="#BDBDBD"
+              />
             </View>
-          </Camera>
-          <Text style={styles.text}>
-            {photo ? "Редагувати фото" : "Завантажте фото"}
-          </Text>
 
-          <View style={styles.formInputs}>
-            <TextInput
-              style={[styles.input]}
-              placeholder="Назва..."
-              placeholderTextColor={"#BDBDBD"}
-              value={inputValues.description}
-              onChangeText={(value) =>
-                setInputValue((prevState) => ({
-                  ...prevState,
-                  description: value,
-                }))
-              }
-            />
-            <TextInput
-              style={[styles.input, { paddingLeft: 28 }]}
-              placeholder="Місцевість..."
-              placeholderTextColor={"#BDBDBD"}
-              value={inputValues.location}
-              onChangeText={(value) =>
-                setInputValue((prevState) => ({
-                  ...prevState,
-                  location: value,
-                }))
-              }
-            />
-            <SimpleLineIcons
-              style={styles.locationIcon}
-              name="location-pin"
-              size={24}
-              color="#BDBDBD"
-            />
-          </View>
-
-          <TouchableOpacity
-            activeOpacity={0.7}
-            style={[
-              styles.submit,
-              { backgroundColor: photo ? "#FF6C00" : "#F6F6F6" },
-            ]}
-            onPress={photo && sendPhoto}
-          >
-            <Text
+            <TouchableOpacity
+              activeOpacity={0.7}
               style={[
-                styles.textSubmit,
-                { color: photo ? "#FFFFFF" : "#BDBDBD" },
+                styles.submit,
+                { backgroundColor: photo ? "#FF6C00" : "#F6F6F6" },
               ]}
+              onPress={photo && sendPhoto}
             >
-              Опублікувати
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+              <Text
+                style={[
+                  styles.textSubmit,
+                  { color: photo ? "#FFFFFF" : "#BDBDBD" },
+                ]}
+              >
+                Опублікувати
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    </ScrollView>
   );
 }
 

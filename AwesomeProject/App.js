@@ -1,55 +1,26 @@
-import { StyleSheet } from "react-native";
+import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
+import { store, persistor } from "./redux/store";
 import { useFonts } from "expo-font";
-import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 // import screens
-import RegistrationScreen from "./Screens/auth/RegistrationScreen";
-import LoginScreen from "./Screens/auth/LoginScreen";
-import Home from "./Screens/Home";
-
-const AuthStack = createNativeStackNavigator();
+import Main from "./Screens/Main";
 
 export default function App() {
   const [fontsLoaded] = useFonts({
     "R-Regular": require("./assets/fonts/Roboto-Regular.ttf"),
     "R-Medium": require("./assets/fonts/Roboto-Medium.ttf"),
+    "R-Bold": require("./assets/fonts/Roboto-Bold.ttf"),
   });
   if (!fontsLoaded) {
     return null;
   }
 
   return (
-    <NavigationContainer>
-      <AuthStack.Navigator style={styles.container}>
-        <AuthStack.Screen
-          options={{ headerShown: false }}
-          name="Login"
-          component={LoginScreen}
-        />
-        <AuthStack.Screen
-          options={{ headerShown: false }}
-          name="Registration"
-          component={RegistrationScreen}
-        />
-        <AuthStack.Screen
-          options={{ headerShown: false }}
-          name="Home"
-          component={Home}
-        />
-      </AuthStack.Navigator>
-    </NavigationContainer>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <Main />
+      </PersistGate>
+    </Provider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "flex-end",
-  },
-  logoutBtn: {
-    marginRight: 16,
-  },
-});

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 import {
   ImageBackground,
   Keyboard,
@@ -9,9 +10,13 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
+  Image,
 } from "react-native";
-
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "./../../firebase/config";
+import * as ImagePicker from "expo-image-picker";
 import BGIMG from "../../assets/images/BG.jpg";
+import { registerDB } from "../../redux/auth/authOperation";
 
 const initialState = {
   login: "",
@@ -25,8 +30,11 @@ export default function RegistrationScreen({ navigation }) {
   const [isFocusPass, setIsFocusPass] = useState(false);
   const [inputValues, setInputValue] = useState(initialState);
   const [isShowPassword, setIsShowPassword] = useState(false);
+  const [avatar, setAvatar] = useState(null);
 
-  const onSubmitForm = () => {
+  const dispatch = useDispatch();
+
+  const onSubmitForm = async () => {
     if (
       inputValues.email === "" ||
       inputValues.password === "" ||
@@ -34,8 +42,41 @@ export default function RegistrationScreen({ navigation }) {
     )
       return alert("Заповніть всі поля");
 
+    const userAvatar = await uploadAvatarToStorage(avatar);
+
+    dispatch(
+      registerDB({
+        mail: inputValues.email,
+        password: inputValues.password,
+        userName: inputValues.login,
+        avatar: userAvatar,
+      })
+    );
     setInputValue({ ...initialState });
-    navigation.navigate("Home");
+  };
+
+  const handleAddAvatar = async () => {
+    const uploadedAvatar = await ImagePicker.launchImageLibraryAsync();
+
+    setAvatar(uploadedAvatar.assets[0].uri);
+  };
+
+  const uploadAvatarToStorage = async (uploadedAvatar) => {
+    if (!uploadedAvatar) return null;
+
+    const response = await fetch(uploadedAvatar);
+    const file = await response.blob();
+
+    const avatarId = Date.now().toString();
+
+    const storageRef = ref(storage, `usersAvatar/${avatarId}`);
+    await uploadBytes(storageRef, file);
+
+    const precessedPhoto = await getDownloadURL(
+      ref(storage, `usersAvatar/${avatarId}`)
+    );
+
+    return precessedPhoto;
   };
 
   return (
@@ -48,7 +89,12 @@ export default function RegistrationScreen({ navigation }) {
         >
           <View style={styles.form}>
             <View style={styles.photo}>
-              <TouchableOpacity activeOpacity={0.7} style={styles.addPhotoBtn}>
+              <Image source={{ uri: avatar }} style={styles.avatar} />
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={styles.addPhotoBtn}
+                onPress={handleAddAvatar}
+              >
                 <Text style={styles.addPhotoText}>+</Text>
               </TouchableOpacity>
             </View>
@@ -157,20 +203,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
-    paddingBottom: 80,
+    paddingBottom: 60,
   },
   photo: {
-    flex: 1,
+    position: "relative",
     justifyContent: "flex-end",
     alignItems: "flex-end",
     width: 120,
-    maxHeight: 120,
+    height: 120,
     marginTop: -60,
     marginBottom: 32,
     borderRadius: 16,
     backgroundColor: "#F6F6F6",
   },
+  avatar: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 16,
+  },
   addPhotoBtn: {
+    position: "absolute",
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
@@ -180,8 +232,8 @@ const styles = StyleSheet.create({
     borderColor: "#FF6C00",
     borderRadius: 12.5,
     backgroundColor: "#FFF",
-    marginBottom: 14,
-    marginRight: -12,
+    bottom: 14,
+    right: -12.5,
   },
   addPhotoText: {
     color: "#FF6C00",

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 import {
   ImageBackground,
   Keyboard,
@@ -12,6 +13,7 @@ import {
 } from "react-native";
 
 import BGIMG from "../../assets/images/BG.jpg";
+import { loginDB } from "../../redux/auth/authOperation";
 
 const initialState = {
   email: "",
@@ -24,6 +26,8 @@ export default function LoginScreen({ navigation }) {
   const [inputValues, setInputValue] = useState(initialState);
   const [isShowPassword, setIsShowPassword] = useState(false);
 
+  const dispatch = useDispatch();
+
   const onSubmitForm = () => {
     if (inputValues.email === "" || inputValues.password === "")
       return alert("Заповніть всі поля");
@@ -35,8 +39,10 @@ export default function LoginScreen({ navigation }) {
     )
       return alert("Не коректно введена пошта");
 
+    dispatch(
+      loginDB({ mail: inputValues.email, password: inputValues.password })
+    );
     setInputValue({ ...initialState });
-    navigation.navigate("Home");
   };
 
   return (
