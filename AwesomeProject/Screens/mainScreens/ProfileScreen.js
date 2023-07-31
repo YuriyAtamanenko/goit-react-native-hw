@@ -75,8 +75,6 @@ export default function ProfileScreen({ navigation }) {
     return precessedPhoto;
   };
 
-  console.log(avatar);
-
   return (
     <ImageBackground source={BGIMG} style={styles.background}>
       <View style={styles.container}>
@@ -194,7 +192,7 @@ const styles = StyleSheet.create({
   logOutBtn: {
     position: "absolute",
     bottom: 12,
-    right: -120,
+    right: -100,
   },
   addPhotoText: {
     color: "#FF6C00",

@@ -28,10 +28,10 @@ export default function Home() {
       screenOptions={{
         tabBarShowLabel: false,
         tabBarStyle: {
-          height: 85,
+          height: 75,
           paddingTop: 10,
-          paddingBottom: 35,
-          paddingHorizontal: 70,
+          paddingBottom: 25,
+          paddingHorizontal: 40,
         },
       }}
     >

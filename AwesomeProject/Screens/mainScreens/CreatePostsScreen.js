@@ -17,6 +17,7 @@ import * as Location from "expo-location";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage, db } from "./../../firebase/config";
 import { collection, addDoc } from "firebase/firestore";
+import * as ImagePicker from "expo-image-picker";
 // import icons
 import { FontAwesome } from "@expo/vector-icons";
 import { SimpleLineIcons } from "@expo/vector-icons";
@@ -54,6 +55,12 @@ export default function CreatePostsScreen({ navigation }) {
   const takePhoto = async () => {
     const photo = await camera.takePictureAsync();
     setPhoto(photo.uri);
+  };
+
+  const uploadPhoto = async () => {
+    const uploadedPhoto = await ImagePicker.launchImageLibraryAsync();
+
+    setPhoto(uploadedPhoto.assets[0].uri);
   };
 
   const sendPhoto = () => {
@@ -109,11 +116,15 @@ export default function CreatePostsScreen({ navigation }) {
                 </TouchableOpacity>
               </View>
             </Camera>
-            <TouchableOpacity onPress={() => setPhoto(null)}>
-              <Text style={styles.text}>
-                {photo ? "Редагувати фото" : "Завантажте фото"}
-              </Text>
-            </TouchableOpacity>
+            {photo ? (
+              <TouchableOpacity onPress={() => setPhoto(null)}>
+                <Text style={styles.text}>Редагувати фото</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity onPress={() => uploadPhoto()}>
+                <Text style={styles.text}>Завантажте фото</Text>
+              </TouchableOpacity>
+            )}
 
             <View style={styles.formInputs}>
               <TextInput
